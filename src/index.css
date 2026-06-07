@@ -1,0 +1,278 @@
+@import 'tailwindcss';
+
+/* ============================================================================
+   "Bioluminescent Lab Terminal" — design tokens
+   Tailwind v4 @theme: every token below becomes both a utility (bg-void,
+   text-signal-cyan, font-display, ease-expo …) AND a :root CSS variable
+   (var(--color-void)) we can hand to three.js / ideogram / inline styles.
+   ============================================================================ */
+@theme {
+  /* base / surface ramp (cool charcoal — the calm carrier layer) */
+  --color-void: #070b14;
+  --color-base: #0b1120;
+  --color-surface-1: #111a2e;
+  --color-surface-2: #18243d;
+  --color-hairline: rgba(255, 255, 255, 0.08);
+  --color-glass-edge: rgba(255, 255, 255, 0.1);
+
+  /* text */
+  --color-text-hi: #eaf2ff;
+  --color-text-mid: #a9b6ce;
+  --color-text-low: #6b7894;
+
+  /* signal / accent ramp (the bioluminescent glow — used sparingly) */
+  --color-signal-cyan: #3df0e6;
+  --color-signal-blue: #4d8dff;
+  --color-signal-violet: #9d7bff;
+  --color-signal-magenta: #ff4fd8;
+
+  /* severity ramp — CVD-safe (Okabe-Ito). Never used as the *only* signal. */
+  --color-sev-pathogenic: #d55e00;
+  --color-sev-carrier: #e69f00;
+  --color-sev-clear: #009e73;
+  --color-sev-info: #56b4e9;
+
+  /* type */
+  --font-display: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', monospace;
+
+  /* signature easing (expo-out — the "expensive" feel) */
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* animations */
+  --animate-heart-pulse: heart-pulse 1s ease-in-out infinite;
+  --animate-orb-drift: orb-drift 18s ease-in-out infinite;
+  --animate-scan: scan 6s linear infinite;
+  --animate-spin-slow: spin 28s linear infinite;
+
+  @keyframes heart-pulse {
+    0%,
+    100% {
+      opacity: 0.45;
+      transform: scale(1);
+    }
+    18% {
+      opacity: 0.9;
+      transform: scale(1.12);
+    }
+    40% {
+      opacity: 0.5;
+      transform: scale(1);
+    }
+  }
+  @keyframes orb-drift {
+    0%,
+    100% {
+      transform: translate3d(0, 0, 0) scale(1);
+    }
+    50% {
+      transform: translate3d(4%, -3%, 0) scale(1.08);
+    }
+  }
+  @keyframes scan {
+    0% {
+      transform: translateY(-100%);
+      opacity: 0;
+    }
+    8% {
+      opacity: 0.6;
+    }
+    92% {
+      opacity: 0.6;
+    }
+    100% {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Base
+   --------------------------------------------------------------------------- */
+@layer base {
+  :root {
+    color-scheme: dark;
+    --glow-cyan: 0 0 24px rgba(61, 240, 230, 0.35);
+    --glow-pathogenic: 0 0 28px rgba(213, 94, 0, 0.4);
+    --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.36);
+  }
+
+  html {
+    /* smooth scroll is driven by Lenis in JS; keep native off to avoid conflicts */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    margin: 0;
+    background-color: var(--color-void);
+    color: var(--color-text-mid);
+    font-family: var(--font-sans);
+    font-size: 1.0625rem;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    color: var(--color-text-hi);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.08;
+    text-wrap: balance;
+  }
+
+  ::selection {
+    background: rgba(61, 240, 230, 0.25);
+    color: var(--color-text-hi);
+  }
+
+  /* Custom scrollbar — quiet, on-theme */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--color-void);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-surface-2);
+    border-radius: 999px;
+    border: 2px solid var(--color-void);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #25365a;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-signal-cyan);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Reusable component classes (kept small; most styling uses Tailwind utils)
+   --------------------------------------------------------------------------- */
+@layer components {
+  /* glassmorphism panel — blur ≤ 20px, 1px light-catcher edge, opaque fallback */
+  .glass {
+    background: rgba(17, 26, 46, 0.55);
+    border: 1px solid var(--color-glass-edge);
+    border-radius: 1rem;
+    box-shadow: var(--card-shadow);
+    backdrop-filter: blur(16px) saturate(1.2);
+    -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  }
+  @supports not (backdrop-filter: blur(1px)) {
+    .glass {
+      background: var(--color-surface-1);
+    }
+  }
+
+  /* mono uppercase "eyebrow" above section titles — sells the terminal look */
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--color-signal-cyan);
+    opacity: 0.6;
+  }
+
+  /* faint blueprint dot-grid background */
+  .blueprint-grid {
+    background-image: radial-gradient(
+      rgba(61, 240, 230, 0.07) 1px,
+      transparent 1px
+    );
+    background-size: 32px 32px;
+  }
+
+  .mono {
+    font-family: var(--font-mono);
+    font-variant-ligatures: none;
+  }
+}
+
+/* Lenis smooth scroll */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+/* ---------------------------------------------------------------------------
+   ideogram.js dark-theme overrides — the library renders light by default.
+   --------------------------------------------------------------------------- */
+.ideogram-dark #_ideogram,
+.ideogram-dark svg {
+  background: transparent !important;
+}
+.ideogram-dark text {
+  fill: var(--color-text-mid) !important;
+  font-family: var(--font-mono) !important;
+}
+.ideogram-dark .chromosome {
+  /* keep the banded chromosome readable on dark */
+  filter: brightness(1.05) drop-shadow(0 0 6px rgba(61, 240, 230, 0.12));
+}
+.ideogram-dark .annot path,
+.ideogram-dark .annot polygon {
+  cursor: pointer;
+}
+/* store → ideogram highlight: scale the triangle in place + glow */
+.ideogram-dark .annot path {
+  transition:
+    transform 0.2s var(--ease-expo),
+    filter 0.2s ease;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.ideogram-dark .annot.annot-selected path {
+  transform: scale(1.7);
+  stroke: #eaf2ff;
+  stroke-width: 1.5px;
+  filter: drop-shadow(0 0 5px currentColor);
+}
+.ideogram-dark .annot:hover path {
+  transform: scale(1.35);
+}
+
+/* ---------------------------------------------------------------------------
+   Reduced motion: honored via OS preference AND a runtime .reduce-motion class
+   (toggled by the MotionToggle / prefs store). Kills animation + scroll smooth.
+   --------------------------------------------------------------------------- */
+.reduce-motion *,
+.reduce-motion *::before,
+.reduce-motion *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
