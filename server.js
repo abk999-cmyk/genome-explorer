@@ -1,8 +1,10 @@
 import http from 'node:http'
 import handler from 'serve-handler'
 
-// Railway injects PORT; fall back to 3000 for local use.
-const port = Number(process.env.PORT) || 3000
+// Use the injected PORT if present, otherwise default to 8080 — Railway's
+// generated domains route to 8080 by default, so listening there means the
+// public URL works with zero manual port configuration.
+const port = Number(process.env.PORT) || 8080
 
 const server = http.createServer((req, res) =>
   handler(req, res, {
